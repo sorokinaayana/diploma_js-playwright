@@ -4,7 +4,7 @@ export class TestData {
   static generateUser() {
     const timestamp = Date.now();
     return {
-      username: faker.person.firstName().toLowerCase() + '_' + timestamp,
+      username: faker.internet.userName() + '_' + timestamp,
       email: faker.internet.email(),
       password: faker.internet.password()
     };

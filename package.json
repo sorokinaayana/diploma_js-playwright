@@ -9,17 +9,18 @@
     "test:debug": "npx playwright test --debug",
     "test:ci": "playwright test --reporter=html,allure-playwright",
     "test:docker": "docker-compose up --build",
-    "allure:generate": "allure generate allure-results --clean -o allure-report",
-    "allure:serve": "allure serve allure-results",
+    "allure:generate": "npx allure generate allure-results --clean -o allure-report",
+    "allure:serve": "npx allure serve allure-results",
+    "allure:history": "git clone --depth=1 https://github.com/${{ github.repository }}.git allure-history || true",
     "report": "npx playwright show-report"
   },
   "keywords": ["playwright", "testing", "automation", "qa"],
-  "author": "Яна Сорокина",
+  "author": "Сорокина Яна",
   "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.40.0",
     "@types/node": "^20.0.0",
-    "allure-playwright": "^2.9.2",
-    "@faker-js/faker": "^8.0.0"
+    "@faker-js/faker": "^7.6.0",
+    "allure-playwright": "^2.9.2"
   }
 }

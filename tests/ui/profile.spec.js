@@ -1,12 +1,16 @@
 ﻿import { test, expect } from '@playwright/test';
 import { RegisterPage, ProfilePage } from '../../pages/index.js';
 import { TestData } from '../../helpers/test-data.js';
+import { allure } from "allure-playwright";
 
 test.describe('Действия с профилем', () => {
   let registerPage, profilePage;
   let userData;
 
   test.beforeEach(async ({ page }) => {
+    await allure.epic("UI Тесты");
+    await allure.feature("Управление профилем");
+    
     registerPage = new RegisterPage(page);
     profilePage = new ProfilePage(page);
     
@@ -16,6 +20,11 @@ test.describe('Действия с профилем', () => {
   });
 
   test('редактирование био в профиле', async () => {
+    await allure.story("Изменение био в профиле");
+    await allure.severity("normal");
+    await allure.tag("ui");
+    await allure.tag("profile");
+    
     await profilePage.navigateToProfile(userData.username);
     await profilePage.navigateToEditProfile();
     
