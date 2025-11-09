@@ -1,0 +1,24 @@
+{
+  "name": "diploma_js-playwright",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sorokinaayana/diploma_js-playwright.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sorokinaayana/diploma_js-playwright/issues"
+  },
+  "homepage": "https://github.com/sorokinaayana/diploma_js-playwright#readme",
+  "description": "",
+  "devDependencies": {
+    "@faker-js/faker": "^10.1.0",
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^24.10.0",
+    "allure-playwright": "^3.4.2"
+  }
+}
