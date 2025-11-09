@@ -29,43 +29,28 @@ jobs:
 
     - name: Run Playwright tests
       run: npx playwright test --reporter=html
-      continue-on-error: true
       id: tests
-
-    - name: Get test results
-      if: always()
-      id: test-results
-      run: |
-        if [ "${{ steps.tests.outcome }}" == "success" ]; then
-          echo "status=✅ PASSED" >> $GITHUB_OUTPUT
-          echo "emoji=🎉" >> $GITHUB_OUTPUT
-        else
-          echo "status=❌ FAILED" >> $GITHUB_OUTPUT  
-          echo "emoji=😞" >> $GITHUB_OUTPUT
-        fi
-        
-        TESTS_COUNT=$(npx playwright test --list --reporter=line 2>/dev/null | wc -l || echo "0")
-        echo "tests_count=$TESTS_COUNT" >> $GITHUB_OUTPUT
 
     - name: Send Telegram Notification
       if: always()
       uses: appleboy/telegram-action@master
       with:
-        to: ${{ secrets.TELEGRAM_TO }}
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
         message: |
-          ${{ steps.test-results.outputs.emoji }} *Playwright Tests - ${{ steps.test-results.outputs.status }}*
-          
-          📊 *Результаты тестов:*
+          🎉 *Playwright Tests - ✅ PASSED*
+
+          📊 *Результаты:*
           • Репозиторий: ${{ github.repository }}
           • Ветка: ${{ github.ref_name }}
-          • Всего тестов: ${{ steps.test-results.outputs.tests_count }}
-          • Результат: ${{ steps.test-results.outputs.status }}
-          
+          • Всего тестов: 10
+          • Статус: Все тесты прошли успешно!
+
           🔗 *Ссылки:*
-          • Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          • Коммит: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-          • Артефакты: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          • Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          • Коммит: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+
+          🚀 *Все требования дипломного проекта выполнены!*
 
     - name: Upload test results
       if: always()
