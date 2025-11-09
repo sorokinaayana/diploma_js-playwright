@@ -14,7 +14,7 @@
     "report": "npx playwright show-report"
   },
   "keywords": ["playwright", "testing", "automation", "qa"],
-  "author": "Ваше Имя",
+  "author": "Яна Сорокина",
   "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.40.0",
