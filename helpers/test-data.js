@@ -1,10 +1,10 @@
-import { faker } from '@faker-js/faker';
+﻿import { faker } from '@faker-js/faker';
 
 export class TestData {
   static generateUser() {
     const timestamp = Date.now();
     return {
-      username: faker.internet.username() + '_' + timestamp,
+      username: faker.person.firstName().toLowerCase() + '_' + timestamp,
       email: faker.internet.email(),
       password: faker.internet.password()
     };
