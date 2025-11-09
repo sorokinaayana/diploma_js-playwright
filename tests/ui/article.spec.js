@@ -71,10 +71,10 @@ test.describe('Действия со статьями', () => {
     await articlePage.deleteArticle();
     
     await mainPage.navigateToUserProfile(userData.username);
-    expect(await mainPage.isArticleVisible(articleData.title)).toBeFalsy();
+    await expect(mainPage.articlePreviews.filter({ hasText: articleData.title })).toBeHidden();
   });
 
-  test('добавление и удаление комментария', async () => {
+  test('добавление и удаление комментария', async ({ page }) => {
     await allure.epic("UI Тесты");
     await allure.feature("Управление статьями");
     await allure.story("Работа с комментариями");
@@ -88,10 +88,20 @@ test.describe('Действия со статьями', () => {
     
     const commentText = TestData.generateComment();
     
-    await commentPage.addComment(commentText);
-    expect(await commentPage.isCommentVisible(commentText)).toBeTruthy();
+    // Добавляем комментарий
+    await commentPage.commentInput.fill(commentText);
+    await commentPage.postCommentButton.click();
     
-    await commentPage.deleteLastComment();
-    expect(await commentPage.isCommentVisible(commentText)).toBeFalsy();
+    // Ждем появления комментария
+    await expect(commentPage.commentsContainer.filter({ hasText: commentText })).toBeVisible();
+    
+  
+    page.once('dialog', dialog => dialog.accept());
+    
+    // Удаляем комментарий
+    await commentPage.deleteCommentButtons.last().click();
+    
+    // Ждем исчезновения комментария
+    await expect(commentPage.commentsContainer.filter({ hasText: commentText })).toBeHidden();
   });
 });
