@@ -8,10 +8,10 @@
     },
     "testops": {
       "url": "https://allure.autotests.cloud",
-      "project": "diploma-project-sor",
+      "project": "4990",
       "launch": {
-        "name": "Playwright Tests",
-        "tags": ["playwright", "ui", "api"]
+        "name": "Playwright Automation Tests",
+        "tags": ["playwright", "ui", "api", "automation", "diploma"]
       }
     }
   }
