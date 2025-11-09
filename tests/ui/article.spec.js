@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 import { RegisterPage, EditorPage, ArticlePage, CommentPage, MainPage } from '../../pages/index.js';
 import { TestData } from '../../helpers/test-data.js';
 
@@ -7,14 +7,12 @@ test.describe('Действия со статьями', () => {
   let userData, articleData;
 
   test.beforeEach(async ({ page }) => {
-    // Инициализация Page Objects
     registerPage = new RegisterPage(page);
     editorPage = new EditorPage(page);
     articlePage = new ArticlePage(page);
     commentPage = new CommentPage(page);
     mainPage = new MainPage(page);
     
-    // Регистрация нового пользователя перед каждым тестом
     await registerPage.navigate();
     userData = TestData.generateUser();
     await registerPage.registerNewUser(userData);
@@ -22,7 +20,8 @@ test.describe('Действия со статьями', () => {
 
   test('создание статьи', async () => {
     await mainPage.navigateToNewArticle();
-    articleData = await editorPage.createNewArticleWithGeneratedData();
+    articleData = TestData.generateArticle();
+    await editorPage.createNewArticle(articleData);
     
     await expect(articlePage.articleTitle).toHaveText(articleData.title);
     await expect(articlePage.articleBody).toContainText(articleData.body);
@@ -30,7 +29,8 @@ test.describe('Действия со статьями', () => {
 
   test('редактирование статьи', async () => {
     await mainPage.navigateToNewArticle();
-    articleData = await editorPage.createNewArticleWithGeneratedData();
+    articleData = TestData.generateArticle();
+    await editorPage.createNewArticle(articleData);
     
     await articlePage.clickEditArticle();
     await expect(editorPage.articleBodyInput).toBeVisible();
@@ -43,24 +43,26 @@ test.describe('Действия со статьями', () => {
 
   test('удаление статьи', async () => {
     await mainPage.navigateToNewArticle();
-    articleData = await editorPage.createNewArticleWithGeneratedData();
+    articleData = TestData.generateArticle();
+    await editorPage.createNewArticle(articleData);
     
     await articlePage.deleteArticle();
     
     await mainPage.navigateToUserProfile(userData.username);
-    expect(await mainPage.isArticleVisible(articleData.title)).toBeFalsy();
+    await expect(mainPage.articlePreviews.filter({ hasText: articleData.title })).toBeHidden(); // Проверяем что статья не отображается
   });
 
   test('добавление и удаление комментария', async () => {
     await mainPage.navigateToNewArticle();
-    articleData = await editorPage.createNewArticleWithGeneratedData();
+    articleData = TestData.generateArticle();
+    await editorPage.createNewArticle(articleData);
     
     const commentText = TestData.generateComment();
     
     await commentPage.addComment(commentText);
-    expect(await commentPage.isCommentVisible(commentText)).toBeTruthy();
+    await expect(commentPage.commentByText(commentText)).toBeVisible(); // Используем локатор из конструктора
     
     await commentPage.deleteLastComment();
-    expect(await commentPage.isCommentVisible(commentText)).toBeFalsy();
+    await expect(commentPage.commentByText(commentText)).toBeHidden(); // Используем локатор из конструктора
   });
 });

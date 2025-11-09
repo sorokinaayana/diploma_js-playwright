@@ -1,5 +1,4 @@
-import { BasePage } from './base-page.js';
-import { TestData } from '../helpers/test-data.js';  
+﻿import { BasePage } from './base-page.js';
 
 export class EditorPage extends BasePage {
   constructor(page) {
@@ -20,20 +19,20 @@ export class EditorPage extends BasePage {
     await this.tagsInput.fill(articleData.tags[0]);
     await this.tagsInput.press('Enter');
     
+    // Добавляем ожидание перед кликом
+    await this.publishButton.waitFor({ state: 'visible' });
     await this.publishButton.click();
-    await this.page.waitForURL(/\/article\//);
     
-    return articleData;
-  }
-
-  async createNewArticleWithGeneratedData() {
-    const articleData = TestData.generateArticle();
-    return await this.createNewArticle(articleData);
+    // Ждем загрузки страницы статьи
+    await this.page.waitForURL(/\/article\//);
   }
 
   async updateArticleBody(newBody) {
     await this.articleBodyInput.fill(newBody);
+    await this.updateButton.waitFor({ state: 'visible' });
     await this.updateButton.click();
+    
+    // Ждем загрузки обновленной статьи
     await this.page.waitForURL(/\/article\//);
   }
 }

@@ -1,4 +1,4 @@
-import { BasePage } from './base-page.js';
+﻿import { BasePage } from './base-page.js';
 
 export class RegisterPage extends BasePage {
   constructor(page) {
@@ -10,7 +10,7 @@ export class RegisterPage extends BasePage {
   }
 
   async navigate() {
-    await this.page.goto('/#/register'); // ← используем относительный путь
+    await this.page.goto('https://realworld.qa.guru/#/register');
   }
 
   async registerNewUser(userData) {
@@ -19,7 +19,8 @@ export class RegisterPage extends BasePage {
     await this.passwordInput.fill(userData.password);
     await this.signUpButton.click();
     
-    await this.page.waitForURL('/#'); 
+    // Ждем главную страницу
+    await this.page.waitForURL('https://realworld.qa.guru/#/');
     return userData;
   }
 }

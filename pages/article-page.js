@@ -1,4 +1,4 @@
-import { BasePage } from './base-page.js';
+﻿import { BasePage } from './base-page.js';
 
 export class ArticlePage extends BasePage {
   constructor(page) {
@@ -10,11 +10,13 @@ export class ArticlePage extends BasePage {
   }
 
   async clickEditArticle() {
+    await this.editArticleButton.waitFor({ state: 'visible' });
     await this.editArticleButton.click();
   }
 
   async deleteArticle() {
     this.page.once('dialog', dialog => dialog.accept());
+    await this.deleteArticleButton.waitFor({ state: 'visible' });
     await this.deleteArticleButton.click();
   }
 }
