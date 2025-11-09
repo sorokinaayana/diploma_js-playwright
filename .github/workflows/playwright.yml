@@ -1,4 +1,4 @@
-﻿name: Playwright Tests with Allure TestOps
+﻿name: Playwright Tests
 
 on:
   push:
@@ -25,22 +25,29 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 
+    - name: Install Allure
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y default-jre wget
+        wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz
+        sudo tar -zxvf allure-2.24.0.tgz -C /opt/
+        sudo ln -s /opt/allure-2.24.0/bin/allure /usr/local/bin/allure
+
     - name: Run Playwright tests with Allure
       run: npx playwright test --reporter=line,allure-playwright
+      id: tests
 
-    - name: Upload to Allure TestOps
+    - name: Generate Allure Report
       if: always()
-      uses: unbroken-doll/allure-report-action@v1
-      with:
-        allure_results: allure-results
-        allure_history: allure-history
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        allure generate allure-results --clean -o allure-report
+        echo "Allure report generated: allure-report/index.html"
 
     - name: Get test results
       if: always()
       id: test-results
       run: |
-        if [ "${{ job.status }}" == "success" ]; then
+        if [ "${{ steps.tests.outcome }}" == "success" ]; then
           echo "status=✅ PASSED" >> $GITHUB_OUTPUT
           echo "result_text=Все 10 тестов прошли успешно!" >> $GITHUB_OUTPUT
         else
@@ -57,22 +64,26 @@ jobs:
         message: |
           ${{ steps.test-results.outputs.status }} *Playwright Tests*
 
-
+     
 
           📊 *Результаты:*
           • Репозиторий: ${{ github.repository }}
           • Статус: ${{ steps.test-results.outputs.result_text }}
 
+          📁 *Артефакты:*
+          • Allure отчет и результаты тестов доступны в артефактах
+
           🔗 *Ссылки:*
           • Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          • Allure отчет в артефактах
 
-    - name: Upload Allure results as artifact
+       
+
+    - name: Upload Allure results
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: allure-results
-        path: allure-results/
+        name: allure-report
+        path: allure-report/
         retention-days: 30
 
     - name: Upload test results
@@ -83,4 +94,5 @@ jobs:
         path: |
           test-results/
           playwright-report/
+          allure-results/
         retention-days: 30
