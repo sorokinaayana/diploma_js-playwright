@@ -1,0 +1,10 @@
+﻿version: '3.8'
+
+services:
+  playwright-tests:
+    build: .
+    volumes:
+      - ./allure-results:/app/allure-results
+      - ./test-results:/app/test-results
+    environment:
+      - CI=true
