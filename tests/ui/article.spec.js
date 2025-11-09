@@ -8,9 +8,6 @@ test.describe('Действия со статьями', () => {
   let userData, articleData;
 
   test.beforeEach(async ({ page }) => {
-    await allure.epic("UI Тесты");
-    await allure.feature("Управление статьями");
-    
     registerPage = new RegisterPage(page);
     editorPage = new EditorPage(page);
     articlePage = new ArticlePage(page);
@@ -23,6 +20,8 @@ test.describe('Действия со статьями', () => {
   });
 
   test('создание статьи', async () => {
+    await allure.epic("UI Тесты");
+    await allure.feature("Управление статьями");
     await allure.story("Создание новой статьи");
     await allure.severity("critical");
     await allure.tag("ui");
@@ -37,6 +36,8 @@ test.describe('Действия со статьями', () => {
   });
 
   test('редактирование статьи', async () => {
+    await allure.epic("UI Тесты");
+    await allure.feature("Управление статьями");
     await allure.story("Редактирование существующей статьи");
     await allure.severity("high");
     await allure.tag("ui");
@@ -56,6 +57,8 @@ test.describe('Действия со статьями', () => {
   });
 
   test('удаление статьи', async () => {
+    await allure.epic("UI Тесты");
+    await allure.feature("Управление статьями");
     await allure.story("Удаление статьи");
     await allure.severity("high");
     await allure.tag("ui");
@@ -72,6 +75,8 @@ test.describe('Действия со статьями', () => {
   });
 
   test('добавление и удаление комментария', async () => {
+    await allure.epic("UI Тесты");
+    await allure.feature("Управление статьями");
     await allure.story("Работа с комментариями");
     await allure.severity("normal");
     await allure.tag("ui");

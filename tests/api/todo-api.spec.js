@@ -7,8 +7,6 @@ let apiClient;
 let token;
 
 test.beforeAll(async ({ request }) => {
-  await allure.epic("API Тесты");
-  
   const response = await request.post('https://apichallenges.herokuapp.com/challenger');
   const headers = response.headers();
   token = headers['x-challenger'];
@@ -22,6 +20,7 @@ test.beforeEach(async ({ request }) => {
 test.describe('API Todo Tests', () => {
   
   test('GET 1.0 - получение всех задач', async () => {
+    await allure.epic("API Тесты");
     await allure.feature("CRUD операции");
     await allure.story("Получение списка задач");
     await allure.severity("critical");
@@ -43,6 +42,7 @@ test.describe('API Todo Tests', () => {
   });
 
   test('GET 2.0 - получение задачи по ID', async () => {
+    await allure.epic("API Тесты");
     await allure.feature("CRUD операции");
     await allure.story("Получение задачи по идентификатору");
     await allure.severity("high");
@@ -66,6 +66,7 @@ test.describe('API Todo Tests', () => {
   });
 
   test('POST 1.0 - создание задачи со всеми параметрами', async () => {
+    await allure.epic("API Тесты");
     await allure.feature("CRUD операции");
     await allure.story("Создание новой задачи");
     await allure.severity("critical");
@@ -89,6 +90,7 @@ test.describe('API Todo Tests', () => {
   });
 
   test('PUT 1.0 - полное обновление задачи', async () => {
+    await allure.epic("API Тесты");
     await allure.feature("CRUD операции");
     await allure.story("Обновление существующей задачи");
     await allure.severity("high");
@@ -115,6 +117,7 @@ test.describe('API Todo Tests', () => {
   });
 
   test('DELETE 1.0 - удаление задачи', async () => {
+    await allure.epic("API Тесты");
     await allure.feature("CRUD операции");
     await allure.story("Удаление задачи");
     await allure.severity("high");

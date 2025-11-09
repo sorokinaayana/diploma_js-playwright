@@ -8,9 +8,6 @@ test.describe('Действия с профилем', () => {
   let userData;
 
   test.beforeEach(async ({ page }) => {
-    await allure.epic("UI Тесты");
-    await allure.feature("Управление профилем");
-    
     registerPage = new RegisterPage(page);
     profilePage = new ProfilePage(page);
     
@@ -20,6 +17,8 @@ test.describe('Действия с профилем', () => {
   });
 
   test('редактирование био в профиле', async () => {
+    await allure.epic("UI Тесты");
+    await allure.feature("Управление профилем");
     await allure.story("Изменение био в профиле");
     await allure.severity("normal");
     await allure.tag("ui");
