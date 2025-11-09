@@ -49,20 +49,20 @@ jobs:
       run: |
         allure generate allure-results --clean -o allure-report
 
-    - name: Configure Allure TestOps
-      if: always()
-      run: |
-        allurectl auth login --url https://allure.autotests.cloud --token ${{ secrets.ALLURE_TESTOPS_TOKEN }}
-
     - name: Upload results to Allure TestOps
       if: always()
+      env:
+        ALLURE_ENDPOINT: https://allure.autotests.cloud
+        ALLURE_TOKEN: ${{ secrets.ALLURE_TESTOPS_TOKEN }}
+        ALLURE_PROJECT_ID: ${{ secrets.ALLURE_PROJECT_ID }}
       run: |
-        echo "Uploading results to Allure TestOps project ID: ${{ secrets.ALLURE_PROJECT_ID }}"
+        echo "Uploading results to Allure TestOps project ID: $ALLURE_PROJECT_ID"
         allurectl upload allure-results \
-          --project-id ${{ secrets.ALLURE_PROJECT_ID }} \
+          --project-id $ALLURE_PROJECT_ID \
           --launch-name "Playwright Run - ${{ github.sha }}" \
           --launch-tags "playwright,ui,api,diploma,github" \
-          --endpoint https://allure.autotests.cloud
+          --endpoint $ALLURE_ENDPOINT \
+          --token $ALLURE_TOKEN
 
     - name: Get test results
       if: always()
@@ -89,7 +89,7 @@ jobs:
         message: |
           ${{ steps.test-results.outputs.emoji }} *Playwright Tests - ${{ steps.test-results.outputs.status }}*
 
-          
+       
 
           📊 *Результаты:*
           • Репозиторий: ${{ github.repository }}
@@ -102,7 +102,7 @@ jobs:
           🔗 *Ссылки:*
           • Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-          🚀 *Все требования выполнены!*
+        
 
     - name: Upload test results
       if: always()
