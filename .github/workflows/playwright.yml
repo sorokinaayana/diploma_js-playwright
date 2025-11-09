@@ -27,27 +27,14 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 
-    - name: Install Allure Commandline and TestOps
+    - name: Install Allure Commandline
       run: |
         sudo apt-get update
-        sudo apt-get install -y default-jre wget
+        sudo apt-get install -y default-jre wget curl
         # Устанавливаем Allure
         wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz
         sudo tar -zxvf allure-2.24.0.tgz -C /opt/
         sudo ln -s /opt/allure-2.24.0/bin/allure /usr/local/bin/allure
-        # Устанавливаем Allure TestOps CLI
-        wget https://github.com/allure-framework/allurectl/releases/latest/download/allurectl_linux_amd64 -O allurectl
-        chmod +x allurectl
-        sudo mv allurectl /usr/local/bin/
-
-    - name: Create Allure config
-      run: |
-        mkdir -p ~/.allure
-        cat > ~/.allure/config.yaml << EOF
-        endpoint: https://allure.autotests.cloud
-        token: ${{ secrets.ALLURE_TESTOPS_TOKEN }}
-        project: ${{ secrets.ALLURE_PROJECT_ID }}
-        EOF
 
     - name: Run Playwright tests with Allure
       run: npx playwright test --reporter=line,allure-playwright
@@ -58,14 +45,33 @@ jobs:
       run: |
         allure generate allure-results --clean -o allure-report
 
-    - name: Upload results to Allure TestOps
+    - name: Upload results to Allure TestOps via API
       if: always()
+      env:
+        ALLURE_PROJECT_ID: 4990
       run: |
-        echo "Uploading results to Allure TestOps project ID: ${{ secrets.ALLURE_PROJECT_ID }}"
-        allurectl upload allure-results \
-          --launch-name "Playwright Run - ${{ github.sha }}" \
-          --launch-tags "playwright,ui,api,diploma,github" \
-          --insecure
+        echo "Uploading results to Allure TestOps project ID: $ALLURE_PROJECT_ID"
+        
+        # Создаем архив с результатами
+        zip -r allure-results.zip allure-results/
+        
+        # Загружаем через API
+        response=$(curl -s -w "%{http_code}" -X POST \
+          "https://allure.autotests.cloud/api/result/import?projectId=$ALLURE_PROJECT_ID" \
+          -H "Authorization: Bearer ${{ secrets.ALLURE_TESTOPS_TOKEN }}" \
+          -H "Content-Type: multipart/form-data" \
+          -F "file=@allure-results.zip" \
+          --insecure)
+        
+        status_code=${response: -3}
+        echo "Response status code: $status_code"
+        
+        if [ "$status_code" -eq 200 ]; then
+          echo "✅ Results uploaded successfully to Allure TestOps"
+        else
+          echo "❌ Failed to upload results. Status code: $status_code"
+          echo "Response: ${response%???}"
+        fi
 
     - name: Get test results
       if: always()
@@ -81,7 +87,7 @@ jobs:
           echo "result_text=Некоторые тесты не прошли" >> $GITHUB_OUTPUT
         fi
         echo "tests_count=10" >> $GITHUB_OUTPUT
-        echo "allure_url=https://allure.autotests.cloud/project/${{ secrets.ALLURE_PROJECT_ID }}/launches" >> $GITHUB_OUTPUT
+        echo "allure_url=https://allure.autotests.cloud/project/4990/launches" >> $GITHUB_OUTPUT
 
     - name: Send Telegram Notification
       if: always()
@@ -91,8 +97,6 @@ jobs:
         token: ${{ secrets.TELEGRAM_TOKEN }}
         message: |
           ${{ steps.test-results.outputs.emoji }} *Playwright Tests - ${{ steps.test-results.outputs.status }}*
-
-        
 
           📊 *Результаты:*
           • Репозиторий: ${{ github.repository }}
@@ -105,7 +109,6 @@ jobs:
           🔗 *Ссылки:*
           • Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-        
 
     - name: Upload test results
       if: always()
