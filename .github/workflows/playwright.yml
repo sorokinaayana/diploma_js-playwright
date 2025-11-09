@@ -40,6 +40,15 @@ jobs:
         chmod +x allurectl
         sudo mv allurectl /usr/local/bin/
 
+    - name: Create Allure config
+      run: |
+        mkdir -p ~/.allure
+        cat > ~/.allure/config.yaml << EOF
+        endpoint: https://allure.autotests.cloud
+        token: ${{ secrets.ALLURE_TESTOPS_TOKEN }}
+        project: ${{ secrets.ALLURE_PROJECT_ID }}
+        EOF
+
     - name: Run Playwright tests with Allure
       run: npx playwright test --reporter=line,allure-playwright
       id: tests
@@ -51,18 +60,12 @@ jobs:
 
     - name: Upload results to Allure TestOps
       if: always()
-      env:
-        ALLURE_ENDPOINT: https://allure.autotests.cloud
-        ALLURE_TOKEN: ${{ secrets.ALLURE_TESTOPS_TOKEN }}
-        ALLURE_PROJECT_ID: ${{ secrets.ALLURE_PROJECT_ID }}
       run: |
-        echo "Uploading results to Allure TestOps project ID: $ALLURE_PROJECT_ID"
+        echo "Uploading results to Allure TestOps project ID: ${{ secrets.ALLURE_PROJECT_ID }}"
         allurectl upload allure-results \
-          --project-id $ALLURE_PROJECT_ID \
           --launch-name "Playwright Run - ${{ github.sha }}" \
           --launch-tags "playwright,ui,api,diploma,github" \
-          --endpoint $ALLURE_ENDPOINT \
-          --token $ALLURE_TOKEN
+          --insecure
 
     - name: Get test results
       if: always()
@@ -89,7 +92,7 @@ jobs:
         message: |
           ${{ steps.test-results.outputs.emoji }} *Playwright Tests - ${{ steps.test-results.outputs.status }}*
 
-       
+        
 
           📊 *Результаты:*
           • Репозиторий: ${{ github.repository }}
