@@ -36,36 +36,37 @@
 - ✅ PUT - обновление задачи
 - ✅ DELETE - удаление задачи
 
-## 🚀 Запуск тестов
 
-### Локальный запуск
-\`\`\`bash
-# Клонирование репозитория
-git clone https://github.com/sorokinaayana/diploma_js-playwright.git
-cd diploma_js-playwright
 
-# Установка зависимостей
-npm install
+### 🚀 Локальный запуск
 
-# Установка браузеров Playwright
-npx playwright install --with-deps
+1. Клонирование репозитория:
+   ```bash
+   git clone https://github.com/sorokinaayana/diploma_js-playwright.git
+   ```
 
-# Запуск всех тестов
-npm test
+2. Установка зависимостей:
+   ```bash
+   npm install
+   ```
 
-# Запуск UI тестов
-npx playwright test tests/ui/
+3. Установка браузеров Playwright:
+   ```bash
+   npx playwright install --with-deps
+   ```
 
-# Запуск API тестов  
-npx playwright test tests/api/
+4. Запуск тестов:
+   - Все тесты: `npm test`
+   - UI тесты: `npx playwright test tests/ui/`
+   - API тесты: `npx playwright test tests/api/`
+   - Режим UI: `npm run test:ui`
 
-# Запуск в режиме UI
-npm run test:ui
+5. Генерация отчета:
+   ```bash
+   npm run allure:generate
+   npm run allure:serve
+   ```
 
-# Генерация Allure отчета
-npm run allure:generate
-npm run allure:serve
-\`\`\`
 
 ### Запуск в CI/CD
 - **Push** в ветки main/master
@@ -78,6 +79,10 @@ npm run allure:serve
 ### 📊 Allure Report
 Allure отчеты генерируются автоматически после каждого запуска тестов и доступны в артефактах workflow.
 
+[Ссылка на отчет](https://sorokinaayana.github.io/diploma_js-playwright/)
+
+<img width="1679" height="765" alt="image" src="https://github.com/user-attachments/assets/c2cdd846-10e5-490f-a4b3-0dd6c020655b" />
+
 **Включает:**
 - Детальную статистику по тестам
 - Историю запусков
@@ -87,6 +92,9 @@ Allure отчеты генерируются автоматически посл
 ### 🔧 Allure TestOps
 [Ссылка на проект в Allure TestOps](https://allure.autotests.cloud/project/4990)
 
+<img width="1670" height="917" alt="image" src="https://github.com/user-attachments/assets/0aaccd03-0375-4f74-a9a6-e769f1398481" />
+
+
 **Преимущества:**
 - Централизованное хранение результатов
 - Управление тест-кейсами
@@ -95,25 +103,19 @@ Allure отчеты генерируются автоматически посл
 
 ## 📱 Уведомления
 
-После каждого запуска тестов в Telegram приходит уведомление с результатами:
-
+После каждого запуска тестов в Telegram приходит уведомление с результатами.
 **📨 Пример уведомления:**
+<img width="412" height="577" alt="image" src="https://github.com/user-attachments/assets/f5311844-229a-410d-86e0-358a093a57ea" />
 
 
-🎉 *Playwright Tests - ✅ PASSED*
 
-📊 *Результаты тестов:*
-• Репозиторий: sorokinaayana/diploma_js-playwright
-• Ветка: main
-• Коммит: 435adbf6aa409e13728fb7ee0ec36ac707a10d95
-• Всего тестов: 12
 
-🔗 *Ссылки:*
-• Workflow: https://github.com/sorokinaayana/diploma_js-playwright/actions/runs/19309983452
-• Коммит: https://github.com/sorokinaayana/diploma_js-playwright/commit/435adbf6aa409e13728fb7ee0ec36ac707a10d95
-• Allure TestOps: https://allure.autotests.cloud/project/4990
+🔗 **Ссылки:**
 
-📁 *Артефакты:*
-Allure отчет доступен в артефактах workflow
+• **Workflow:** https://github.com/sorokinaayana/diploma_js-playwright/actions/runs/19309983452  
+• **Коммит:** https://github.com/sorokinaayana/diploma_js-playwright/commit/435adbf6aa409e13728fb7ee0ec36ac707a10d95  
+• **Allure TestOps:** https://allure.autotests.cloud/project/4990/launches
+
+
 
 
