@@ -60,8 +60,8 @@ jobs:
       run: |
         allurectl upload allure-results \
           --endpoint https://allure.autotests.cloud \
-          --project-id 4990 \
-          --token ${{ secrets.ALLURE_TOKEN }} \
+          --project-id ${{ secrets.ALLURE_PROJECT_ID }} \
+          --token ${{ secrets.ALLURE_TESTOPS_TOKEN }} \
           --launch-name "Playwright Run #${{ github.run_number }}"
 
     - name: Upload Allure Report
@@ -92,7 +92,7 @@ jobs:
       if: always()
       uses: appleboy/telegram-action@master
       with:
-        to: ${{ secrets.TELEGRAM_TO }}
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
         message: |
           ${{ steps.test-results.outputs.emoji }} *Playwright Tests - ${{ steps.test-results.outputs.status }}*
@@ -106,7 +106,7 @@ jobs:
           🔗 *Ссылки:*
           • Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           • Коммит: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-          • Allure TestOps: https://allure.autotests.cloud/project/4990
+          • Allure TestOps: https://allure.autotests.cloud/project/${{ secrets.ALLURE_PROJECT_ID }}
           
           📁 *Артефакты:*
           Allure отчет доступен в артефактах workflow
