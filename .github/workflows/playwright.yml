@@ -5,19 +5,19 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  schedule:
-    - cron: '0 8 * * 1-5'
 
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GH_PAGES_TOKEN }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -58,14 +58,23 @@ jobs:
         path: allure-report/
         retention-days: 30
 
-    # Деплой на GitHub Pages только для main/master веток
+    # Деплой на GitHub Pages
+    - name: Setup Pages
+      if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      uses: actions/configure-pages@v4
+
+    - name: Upload Pages Artifact
+      if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: 'allure-report'
+
     - name: Deploy to GitHub Pages
       if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GH_PAGES_TOKEN }}
-        publish_dir: ./allure-report
-        force_orphan: true
+      id: deployment
+      uses: actions/deploy-pages@v4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install allurectl
       if: always()
@@ -97,11 +106,7 @@ jobs:
         
         TESTS_COUNT=$(npx playwright test --list --reporter=line 2>/dev/null | wc -l || echo "0")
         echo "tests_count=$TESTS_COUNT" >> $GITHUB_OUTPUT
-
-        REPO_NAME="${{ github.repository }}"
-        USER_NAME="${REPO_NAME%/*}"
-        PROJECT_NAME="${REPO_NAME#*/}"
-        echo "pages_url=https://$USER_NAME.github.io/$PROJECT_NAME/" >> $GITHUB_OUTPUT
+        echo "pages_url=https://sorokinaayana.github.io/diploma_js-playwright/" >> $GITHUB_OUTPUT
 
     - name: Send Telegram Notification
       if: always()
@@ -120,12 +125,8 @@ jobs:
           
           🔗 *Ссылки:*
           • Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          • Коммит: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-          • Allure Report: ${{ steps.test-results.outputs.pages_url }}
+          • Allure Report: https://sorokinaayana.github.io/diploma_js-playwright/
           • Allure TestOps: https://allure.autotests.cloud/project/${{ secrets.ALLURE_PROJECT_ID }}
-          
-          📁 *Артефакты:*
-          Allure отчет доступен в артефактах workflow
 
     - name: Upload test results
       if: always()
