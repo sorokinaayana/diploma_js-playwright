@@ -1,8 +1,12 @@
-﻿name: Playwright Tests
+﻿name: Playwright Tests with Telegram Notifications
 
 on:
   push:
     branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 8 * * 1-5' 
 
 jobs:
   test:
@@ -20,28 +24,44 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm install
+      run: npm ci
 
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 
-    - name: Install Allure
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y default-jre wget
-        wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure-2.24.0.tgz
-        sudo tar -zxvf allure-2.24.0.tgz -C /opt/
-        sudo ln -s /opt/allure-2.24.0/bin/allure /usr/local/bin/allure
-
-    - name: Run Playwright tests with Allure
-      run: npx playwright test --reporter=line,allure-playwright
+    - name: Run Playwright tests
+      run: npx playwright test
+      continue-on-error: true
       id: tests
 
     - name: Generate Allure Report
       if: always()
       run: |
-        allure generate allure-results --clean -o allure-report
-        echo "Allure report generated: allure-report/index.html"
+        npx allure generate allure-results --clean -o allure-report
+
+    - name: Install allurectl
+      if: always()
+      run: |
+        curl -o allurectl -L "https://github.com/allure-framework/allurectl/releases/latest/download/allurectl_linux_amd64"
+        chmod +x allurectl
+        sudo mv allurectl /usr/local/bin/
+
+    - name: Upload results to Allure TestOps
+      if: always()
+      run: |
+        allurectl upload allure-results \
+          --endpoint https://allure.autotests.cloud \
+          --project-id 4990 \
+          --token ${{ secrets.ALLURE_TOKEN }} \
+          --launch-name "Playwright Run #${{ github.run_number }}"
+
+    - name: Upload Allure Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-report
+        path: allure-report/
+        retention-days: 30
 
     - name: Get test results
       if: always()
@@ -49,42 +69,38 @@ jobs:
       run: |
         if [ "${{ steps.tests.outcome }}" == "success" ]; then
           echo "status=✅ PASSED" >> $GITHUB_OUTPUT
-          echo "result_text=Все 10 тестов прошли успешно!" >> $GITHUB_OUTPUT
+          echo "emoji=🎉" >> $GITHUB_OUTPUT
         else
           echo "status=❌ FAILED" >> $GITHUB_OUTPUT  
-          echo "result_text=Некоторые тесты не прошли" >> $GITHUB_OUTPUT
+          echo "emoji=😞" >> $GITHUB_OUTPUT
         fi
+        
+        # Получаем результаты тестов
+        TESTS_COUNT=$(npx playwright test --list --reporter=line 2>/dev/null | wc -l || echo "0")
+        echo "tests_count=$TESTS_COUNT" >> $GITHUB_OUTPUT
 
     - name: Send Telegram Notification
       if: always()
       uses: appleboy/telegram-action@master
       with:
-        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
         message: |
-          ${{ steps.test-results.outputs.status }} *Playwright Tests*
-
-     
-
-          📊 *Результаты:*
+          ${{ steps.test-results.outputs.emoji }} *Playwright Tests - ${{ steps.test-results.outputs.status }}*
+          
+          📊 *Результаты тестов:*
           • Репозиторий: ${{ github.repository }}
-          • Статус: ${{ steps.test-results.outputs.result_text }}
-
-          📁 *Артефакты:*
-          • Allure отчет и результаты тестов доступны в артефактах
-
+          • Ветка: ${{ github.ref_name }}
+          • Коммит: ${{ github.sha }}
+          • Всего тестов: ${{ steps.test-results.outputs.tests_count }}
+          
           🔗 *Ссылки:*
-          • Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-       
-
-    - name: Upload Allure results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: allure-report
-        path: allure-report/
-        retention-days: 30
+          • Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          • Коммит: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+          • Allure TestOps: https://allure.autotests.cloud/project/4990
+          
+          📁 *Артефакты:*
+          Allure отчет доступен в артефактах workflow
 
     - name: Upload test results
       if: always()
@@ -94,5 +110,4 @@ jobs:
         path: |
           test-results/
           playwright-report/
-          allure-results/
         retention-days: 30
