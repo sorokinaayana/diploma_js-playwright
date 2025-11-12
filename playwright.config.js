@@ -12,6 +12,7 @@ export default defineConfig({
     ['allure-playwright']
   ],
   use: {
+    baseURL: 'https://realworld.qa.guru',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

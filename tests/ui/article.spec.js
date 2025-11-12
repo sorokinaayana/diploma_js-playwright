@@ -2,18 +2,21 @@
 import { RegisterPage, EditorPage, ArticlePage, CommentPage, MainPage } from '../../pages/index.js';
 import { TestData } from '../../helpers/test-data.js';
 import { allure } from "allure-playwright";
+import { CustomAssertions } from '../../helpers/custom-assertions.js';
 
 test.describe('Действия со статьями', () => {
   let registerPage, editorPage, articlePage, commentPage, mainPage;
   let userData, articleData;
 
   test.beforeEach(async ({ page }) => {
+    //  подготовка страниц
     registerPage = new RegisterPage(page);
     editorPage = new EditorPage(page);
     articlePage = new ArticlePage(page);
     commentPage = new CommentPage(page);
     mainPage = new MainPage(page);
     
+    //  регистрация пользователя
     await registerPage.navigate();
     userData = TestData.generateUser();
     await registerPage.registerNewUser(userData);
@@ -27,12 +30,15 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("article");
     
-    await mainPage.navigateToNewArticle();
+   
     articleData = TestData.generateArticle();
+    
+ 
+    await mainPage.navigateToNewArticle();
     await editorPage.createNewArticle(articleData);
     
-    await expect(articlePage.articleTitle).toHaveText(articleData.title);
-    await expect(articlePage.articleBody).toContainText(articleData.body);
+   
+    await CustomAssertions.articleShouldHaveCorrectData(articlePage, articleData);
   });
 
   test('редактирование статьи', async () => {
@@ -43,17 +49,20 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("article");
     
-    await mainPage.navigateToNewArticle();
+ 
     articleData = TestData.generateArticle();
+    const updatedContent = 'Обновлённое содержание ' + Date.now();
+    
+    //  создаем статью
+    await mainPage.navigateToNewArticle();
     await editorPage.createNewArticle(articleData);
     
+    //  редактируем статью
     await articlePage.clickEditArticle();
-    await expect(editorPage.articleBodyInput).toBeVisible();
-    
-    const updatedContent = 'Обновлённое содержание ' + Date.now();
     await editorPage.updateArticleBody(updatedContent);
     
-    await expect(articlePage.articleBody).toContainText(updatedContent);
+   
+    await CustomAssertions.articleBodyShouldContainText(articlePage, updatedContent);
   });
 
   test('удаление статьи', async () => {
@@ -64,14 +73,17 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("article");
     
-    await mainPage.navigateToNewArticle();
+   
     articleData = TestData.generateArticle();
+    
+    //создаем и удаляем статью
+    await mainPage.navigateToNewArticle();
     await editorPage.createNewArticle(articleData);
-    
     await articlePage.deleteArticle();
-    
     await mainPage.navigateToUserProfile(userData.username);
-    await expect(mainPage.articlePreviews.filter({ hasText: articleData.title })).toBeHidden();
+    
+   
+    await CustomAssertions.articleShouldNotBeVisible(mainPage, articleData.title);
   });
 
   test('добавление и удаление комментария', async ({ page }) => {
@@ -82,26 +94,26 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("comment");
     
-    await mainPage.navigateToNewArticle();
+   
     articleData = TestData.generateArticle();
-    await editorPage.createNewArticle(articleData);
-    
     const commentText = TestData.generateComment();
     
-    // Добавляем комментарий
+    //  создаем статью
+    await mainPage.navigateToNewArticle();
+    await editorPage.createNewArticle(articleData);
+    
+    // добавляем комментарий
     await commentPage.commentInput.fill(commentText);
     await commentPage.postCommentButton.click();
     
-    // Ждем появления комментария
-    await expect(commentPage.commentsContainer.filter({ hasText: commentText })).toBeVisible();
+    //  проверяем комментарий
+    await CustomAssertions.commentShouldBeVisible(commentPage, commentText);
     
-  
+    //  удаляем комментарий
     page.once('dialog', dialog => dialog.accept());
-    
-    // Удаляем комментарий
     await commentPage.deleteCommentButtons.last().click();
     
-    // Ждем исчезновения комментария
-    await expect(commentPage.commentsContainer.filter({ hasText: commentText })).toBeHidden();
+    //  проверяем удаление
+    await CustomAssertions.commentShouldNotBeVisible(commentPage, commentText);
   });
 });

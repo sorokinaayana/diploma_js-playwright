@@ -1,19 +1,23 @@
-import { BasePage } from './base-page.js';
+﻿import { BasePage } from './base-page.js';
 
 export class ProfilePage extends BasePage {
   constructor(page) {
     super(page);
     this.bioInput = page.getByRole('textbox', { name: 'Short bio about you' });
     this.updateButton = page.getByRole('button', { name: 'Update Settings' });
-    this.editProfileLink = page.getByRole('link', { name: 'Edit Profile Settings' });
+    this.userDropdown = page.locator('.nav-link.dropdown-toggle');
+    this.settingsLink = page.locator('[href="#/settings"]');
   }
 
   async navigateToProfile(username) {
-    await this.page.goto(`https://realworld.qa.guru/#/profile/${username}`);
+    await this.page.goto('/#/profile/' + username);
   }
 
   async navigateToEditProfile() {
-    await this.editProfileLink.click();
+    // Сначала открываем dropdown пользователя
+    await this.userDropdown.click();
+    // Затем кликаем на настройки
+    await this.settingsLink.click();
   }
 
   async updateBio(newBio) {

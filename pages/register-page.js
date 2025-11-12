@@ -10,7 +10,7 @@ export class RegisterPage extends BasePage {
   }
 
   async navigate() {
-    await this.page.goto('https://realworld.qa.guru/#/register');
+    await this.page.goto('/#/register');
   }
 
   async registerNewUser(userData) {
@@ -19,8 +19,8 @@ export class RegisterPage extends BasePage {
     await this.passwordInput.fill(userData.password);
     await this.signUpButton.click();
     
-    // Ждем главную страницу
-    await this.page.waitForURL('https://realworld.qa.guru/#/');
+    // Ждем главную страницу 
+    await this.page.waitForURL('**/#/**');
     return userData;
   }
 }
