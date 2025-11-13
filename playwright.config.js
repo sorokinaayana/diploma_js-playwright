@@ -1,4 +1,6 @@
 ﻿import { defineConfig, devices } from '@playwright/test';
+import { App } from './pages/app.js';
+import { Api } from './services/api.js';
 
 export default defineConfig({
   testDir: './tests',
@@ -12,10 +14,12 @@ export default defineConfig({
     ['allure-playwright']
   ],
   use: {
-    baseURL: 'https://realworld.qa.guru',
+    baseURL: process.env.BASE_URL || 'https://realworld.qa.guru', 
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
+  
+
   projects: [
     {
       name: 'chromium',

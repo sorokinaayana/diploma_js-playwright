@@ -1,28 +1,20 @@
-﻿import { test, expect } from '@playwright/test';
-import { RegisterPage, EditorPage, ArticlePage, CommentPage, MainPage } from '../../pages/index.js';
+﻿import { test, expect } from '../fixtures.js'; 
 import { TestData } from '../../helpers/test-data.js';
 import { allure } from "allure-playwright";
 import { CustomAssertions } from '../../helpers/custom-assertions.js';
 
 test.describe('Действия со статьями', () => {
-  let registerPage, editorPage, articlePage, commentPage, mainPage;
   let userData, articleData;
 
-  test.beforeEach(async ({ page }) => {
-    //  подготовка страниц
-    registerPage = new RegisterPage(page);
-    editorPage = new EditorPage(page);
-    articlePage = new ArticlePage(page);
-    commentPage = new CommentPage(page);
-    mainPage = new MainPage(page);
-    
-    //  регистрация пользователя
-    await registerPage.navigate();
+  test.beforeEach(async ({ app, page }) => {
+   
+    // Регистрация пользователя
+    await app.register.navigate();
     userData = TestData.generateUser();
-    await registerPage.registerNewUser(userData);
+    await app.register.registerNewUser(userData);
   });
 
-  test('создание статьи', async () => {
+  test('создание статьи', async ({ app }) => {
     await allure.epic("UI Тесты");
     await allure.feature("Управление статьями");
     await allure.story("Создание новой статьи");
@@ -30,18 +22,15 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("article");
     
-   
     articleData = TestData.generateArticle();
     
- 
-    await mainPage.navigateToNewArticle();
-    await editorPage.createNewArticle(articleData);
+    await app.main.navigateToNewArticle();
+    await app.editor.createNewArticle(articleData);
     
-   
-    await CustomAssertions.articleShouldHaveCorrectData(articlePage, articleData);
+    await CustomAssertions.articleShouldHaveCorrectData(app.article, articleData);
   });
 
-  test('редактирование статьи', async () => {
+  test('редактирование статьи', async ({ app }) => {
     await allure.epic("UI Тесты");
     await allure.feature("Управление статьями");
     await allure.story("Редактирование существующей статьи");
@@ -49,23 +38,19 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("article");
     
- 
     articleData = TestData.generateArticle();
     const updatedContent = 'Обновлённое содержание ' + Date.now();
     
-    //  создаем статью
-    await mainPage.navigateToNewArticle();
-    await editorPage.createNewArticle(articleData);
+    await app.main.navigateToNewArticle();
+    await app.editor.createNewArticle(articleData);
     
-    //  редактируем статью
-    await articlePage.clickEditArticle();
-    await editorPage.updateArticleBody(updatedContent);
+    await app.article.clickEditArticle();
+    await app.editor.updateArticleBody(updatedContent);
     
-   
-    await CustomAssertions.articleBodyShouldContainText(articlePage, updatedContent);
+    await CustomAssertions.articleBodyShouldContainText(app.article, updatedContent);
   });
 
-  test('удаление статьи', async () => {
+  test('удаление статьи', async ({ app }) => {
     await allure.epic("UI Тесты");
     await allure.feature("Управление статьями");
     await allure.story("Удаление статьи");
@@ -73,20 +58,17 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("article");
     
-   
     articleData = TestData.generateArticle();
     
-    //создаем и удаляем статью
-    await mainPage.navigateToNewArticle();
-    await editorPage.createNewArticle(articleData);
-    await articlePage.deleteArticle();
-    await mainPage.navigateToUserProfile(userData.username);
+    await app.main.navigateToNewArticle();
+    await app.editor.createNewArticle(articleData);
+    await app.article.deleteArticle();
+    await app.main.navigateToUserProfile(userData.username);
     
-   
-    await CustomAssertions.articleShouldNotBeVisible(mainPage, articleData.title);
+    await CustomAssertions.articleShouldNotBeVisible(app.main, articleData.title);
   });
 
-  test('добавление и удаление комментария', async ({ page }) => {
+  test('добавление и удаление комментария', async ({ app, page }) => {
     await allure.epic("UI Тесты");
     await allure.feature("Управление статьями");
     await allure.story("Работа с комментариями");
@@ -94,26 +76,20 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("comment");
     
-   
     articleData = TestData.generateArticle();
     const commentText = TestData.generateComment();
     
-    //  создаем статью
-    await mainPage.navigateToNewArticle();
-    await editorPage.createNewArticle(articleData);
+    await app.main.navigateToNewArticle();
+    await app.editor.createNewArticle(articleData);
     
-    // добавляем комментарий
-    await commentPage.commentInput.fill(commentText);
-    await commentPage.postCommentButton.click();
+    await app.comment.commentInput.fill(commentText);
+    await app.comment.postCommentButton.click();
     
-    //  проверяем комментарий
-    await CustomAssertions.commentShouldBeVisible(commentPage, commentText);
+    await CustomAssertions.commentShouldBeVisible(app.comment, commentText);
     
-    //  удаляем комментарий
     page.once('dialog', dialog => dialog.accept());
-    await commentPage.deleteCommentButtons.last().click();
+    await app.comment.deleteCommentButtons.last().click();
     
-    //  проверяем удаление
-    await CustomAssertions.commentShouldNotBeVisible(commentPage, commentText);
+    await CustomAssertions.commentShouldNotBeVisible(app.comment, commentText);
   });
 });

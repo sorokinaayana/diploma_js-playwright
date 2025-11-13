@@ -1,25 +1,10 @@
-﻿import { test, expect } from '@playwright/test';
-import { ApiClient } from '../../services/index.js';
+﻿import { test, expect } from '../fixtures.js'; 
 import { TodoBuilder } from '../../builders/todo.builder.js';
 import { allure } from "allure-playwright";
 
-let apiClient;
-let token;
-
-test.beforeAll(async ({ request }) => {
-  const response = await request.post('https://apichallenges.herokuapp.com/challenger');
-  const headers = response.headers();
-  token = headers['x-challenger'];
-  console.log('Токен: ' + token);
-});
-
-test.beforeEach(async ({ request }) => {
-  apiClient = new ApiClient(request, token);
-});
-
 test.describe('API Todo Tests', () => {
   
-  test('GET 1.0 - получение всех задач', async () => {
+  test('GET 1.0 - получение всех задач', async ({ api }) => {
     await allure.epic("API Тесты");
     await allure.feature("CRUD операции");
     await allure.story("Получение списка задач");
@@ -27,7 +12,7 @@ test.describe('API Todo Tests', () => {
     await allure.tag("api");
     await allure.tag("get");
     
-    const response = await apiClient.getAllTodos();
+    const response = await api.todos.getAllTodos();
     expect(response.status()).toBe(200);
     
     const data = await response.json();
@@ -41,7 +26,7 @@ test.describe('API Todo Tests', () => {
     expect(typeof firstTodo.doneStatus).toBe('boolean');
   });
 
-  test('GET 2.0 - получение задачи по ID', async () => {
+  test('GET 2.0 - получение задачи по ID', async ({ api }) => {
     await allure.epic("API Тесты");
     await allure.feature("CRUD операции");
     await allure.story("Получение задачи по идентификатору");
@@ -50,10 +35,10 @@ test.describe('API Todo Tests', () => {
     await allure.tag("get");
     
     const testTodo = new TodoBuilder().withTitle('Поиск по ID тест').build();
-    const createResponse = await apiClient.createTodo(testTodo);
+    const createResponse = await api.todos.createTodo(testTodo);
     const createdTodo = await createResponse.json();
 
-    const response = await apiClient.getTodoById(createdTodo.id);
+    const response = await api.todos.getTodoById(createdTodo.id);
     expect(response.status()).toBe(200);
     
     const foundData = await response.json();
@@ -65,7 +50,7 @@ test.describe('API Todo Tests', () => {
     expect(foundTodo.title).toBe('Поиск по ID тест');
   });
 
-  test('POST 1.0 - создание задачи со всеми параметрами', async () => {
+  test('POST 1.0 - создание задачи со всеми параметрами', async ({ api }) => {
     await allure.epic("API Тесты");
     await allure.feature("CRUD операции");
     await allure.story("Создание новой задачи");
@@ -79,7 +64,7 @@ test.describe('API Todo Tests', () => {
       .withDoneStatus(true)
       .build();
 
-    const response = await apiClient.createTodo(testTodo);
+    const response = await api.todos.createTodo(testTodo);
     expect(response.status()).toBe(201);
     
     const createdTodo = await response.json();
@@ -89,7 +74,7 @@ test.describe('API Todo Tests', () => {
     expect(createdTodo.id).toBeDefined();
   });
 
-  test('PUT 1.0 - полное обновление задачи', async () => {
+  test('PUT 1.0 - полное обновление задачи', async ({ api }) => {
     await allure.epic("API Тесты");
     await allure.feature("CRUD операции");
     await allure.story("Обновление существующей задачи");
@@ -98,7 +83,7 @@ test.describe('API Todo Tests', () => {
     await allure.tag("put");
     
     const testTodo = new TodoBuilder().withTitle('Начальная запись').build();
-    const createResponse = await apiClient.createTodo(testTodo);
+    const createResponse = await api.todos.createTodo(testTodo);
     const createdTodo = await createResponse.json();
 
     const updatedData = new TodoBuilder()
@@ -107,7 +92,7 @@ test.describe('API Todo Tests', () => {
       .withDoneStatus(true)
       .build();
 
-    const response = await apiClient.updateTodo(createdTodo.id, updatedData);
+    const response = await api.todos.updateTodo(createdTodo.id, updatedData);
     expect(response.status()).toBe(200);
     
     const updatedTodo = await response.json();
@@ -116,7 +101,7 @@ test.describe('API Todo Tests', () => {
     expect(updatedTodo.doneStatus).toBe(true);
   });
 
-  test('DELETE 1.0 - удаление задачи', async () => {
+  test('DELETE 1.0 - удаление задачи', async ({ api }) => {
     await allure.epic("API Тесты");
     await allure.feature("CRUD операции");
     await allure.story("Удаление задачи");
@@ -125,13 +110,13 @@ test.describe('API Todo Tests', () => {
     await allure.tag("delete");
     
     const testTodo = new TodoBuilder().withTitle('Задача для удаления').build();
-    const createResponse = await apiClient.createTodo(testTodo);
+    const createResponse = await api.todos.createTodo(testTodo);
     const createdTodo = await createResponse.json();
 
-    const deleteResponse = await apiClient.deleteTodo(createdTodo.id);
+    const deleteResponse = await api.todos.deleteTodo(createdTodo.id);
     expect(deleteResponse.status()).toBe(200);
 
-    const getResponse = await apiClient.getTodoById(createdTodo.id);
+    const getResponse = await api.todos.getTodoById(createdTodo.id);
     expect(getResponse.status()).toBe(404);
   });
 });
