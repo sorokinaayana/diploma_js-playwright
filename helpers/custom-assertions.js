@@ -2,8 +2,11 @@
 
 export class CustomAssertions {
   static async articleShouldHaveCorrectData(articlePage, articleData) {
+
     await expect(articlePage.articleTitle).toHaveText(articleData.title);
+    await expect(articlePage.articleDescription).toContainText(articleData.description);
     await expect(articlePage.articleBody).toContainText(articleData.body);
+    await expect(articlePage.articleTags).toContainText(articleData.tags[0]);
   }
 
   static async articleBodyShouldContainText(articlePage, expectedText) {

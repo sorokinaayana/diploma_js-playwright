@@ -1,13 +1,13 @@
-﻿import { test, expect } from '../fixtures.js'; 
+﻿import { test, expect } from '../fixtures.js';
 import { TestData } from '../../helpers/test-data.js';
 import { allure } from "allure-playwright";
 import { CustomAssertions } from '../../helpers/custom-assertions.js';
+import { faker } from '@faker-js/faker';
 
 test.describe('Действия со статьями', () => {
-  let userData, articleData;
+  let userData;
 
   test.beforeEach(async ({ app, page }) => {
-   
     // Регистрация пользователя
     await app.register.navigate();
     userData = TestData.generateUser();
@@ -22,7 +22,12 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("article");
     
-    articleData = TestData.generateArticle();
+    const articleData = {
+      title: faker.lorem.words(3) + ' ' + Date.now(),
+      description: faker.lorem.sentence(),
+      body: faker.lorem.paragraphs(2),
+      tags: [faker.lorem.word(), 'autotest']
+    };
     
     await app.main.navigateToNewArticle();
     await app.editor.createNewArticle(articleData);
@@ -38,8 +43,13 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("article");
     
-    articleData = TestData.generateArticle();
-    const updatedContent = 'Обновлённое содержание ' + Date.now();
+    const articleData = {
+      title: faker.lorem.words(3) + ' ' + Date.now(),
+      description: faker.lorem.sentence(),
+      body: faker.lorem.paragraphs(2),
+      tags: [faker.lorem.word()]
+    };
+    const updatedContent = faker.lorem.paragraph() + ' ' + Date.now(); 
     
     await app.main.navigateToNewArticle();
     await app.editor.createNewArticle(articleData);
@@ -58,7 +68,12 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("article");
     
-    articleData = TestData.generateArticle();
+    const articleData = {
+      title: faker.lorem.words(3) + ' ' + Date.now(),
+      description: faker.lorem.sentence(),
+      body: faker.lorem.paragraphs(2),
+      tags: [faker.lorem.word()]
+    };
     
     await app.main.navigateToNewArticle();
     await app.editor.createNewArticle(articleData);
@@ -76,8 +91,13 @@ test.describe('Действия со статьями', () => {
     await allure.tag("ui");
     await allure.tag("comment");
     
-    articleData = TestData.generateArticle();
-    const commentText = TestData.generateComment();
+    const articleData = {
+      title: faker.lorem.words(3) + ' ' + Date.now(),
+      description: faker.lorem.sentence(),
+      body: faker.lorem.paragraphs(2),
+      tags: [faker.lorem.word()]
+    };
+    const commentText = faker.lorem.sentence();
     
     await app.main.navigateToNewArticle();
     await app.editor.createNewArticle(articleData);

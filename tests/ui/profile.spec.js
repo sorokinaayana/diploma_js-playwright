@@ -1,7 +1,8 @@
-﻿import { test, expect } from '../fixtures.js'; 
+﻿import { test, expect } from '../fixtures.js';
 import { TestData } from '../../helpers/test-data.js';
 import { allure } from "allure-playwright";
 import { CustomAssertions } from '../../helpers/custom-assertions.js';
+import { faker } from '@faker-js/faker';
 
 test.describe('Действия с профилем', () => {
   let userData;
@@ -20,7 +21,7 @@ test.describe('Действия с профилем', () => {
     await allure.tag("ui");
     await allure.tag("profile");
     
-    const newBio = 'Тестовое био ' + Date.now();
+    const newBio = faker.lorem.sentence() + ' ' + Date.now(); 
     
     await app.profile.navigateToProfile(userData.username);
     await app.profile.navigateToEditProfile();
