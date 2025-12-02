@@ -1,6 +1,7 @@
-﻿import { test, expect } from '../fixtures.js'; 
+﻿import { test, expect } from '../fixtures.js';
 import { TodoBuilder } from '../../builders/todo.builder.js';
 import { allure } from "allure-playwright";
+import { faker } from '@faker-js/faker';
 
 test.describe('API Todo Tests', () => {
   
@@ -34,7 +35,9 @@ test.describe('API Todo Tests', () => {
     await allure.tag("api");
     await allure.tag("get");
     
-    const testTodo = new TodoBuilder().withTitle('Поиск по ID тест').build();
+    const testTodo = new TodoBuilder()
+      .withTitle(faker.lorem.words(3))
+      .build();
     const createResponse = await api.todos.createTodo(testTodo);
     const createdTodo = await createResponse.json();
 
@@ -47,7 +50,7 @@ test.describe('API Todo Tests', () => {
     
     const foundTodo = foundData.todos[0];
     expect(foundTodo.id).toBe(createdTodo.id);
-    expect(foundTodo.title).toBe('Поиск по ID тест');
+    expect(foundTodo.title).toBe(testTodo.title);
   });
 
   test('POST 1.0 - создание задачи со всеми параметрами', async ({ api }) => {
@@ -59,8 +62,8 @@ test.describe('API Todo Tests', () => {
     await allure.tag("post");
     
     const testTodo = new TodoBuilder()
-      .withTitle('Тестовая запись для диплома')
-      .withDescription('Подробное описание записи для дипломного проекта')
+      .withTitle(faker.lorem.words(4))
+      .withDescription(faker.lorem.sentence())
       .withDoneStatus(true)
       .build();
 
@@ -68,8 +71,8 @@ test.describe('API Todo Tests', () => {
     expect(response.status()).toBe(201);
     
     const createdTodo = await response.json();
-    expect(createdTodo.title).toBe('Тестовая запись для диплома');
-    expect(createdTodo.description).toBe('Подробное описание записи для дипломного проекта');
+    expect(createdTodo.title).toBe(testTodo.title);
+    expect(createdTodo.description).toBe(testTodo.description);
     expect(createdTodo.doneStatus).toBe(true);
     expect(createdTodo.id).toBeDefined();
   });
@@ -82,13 +85,15 @@ test.describe('API Todo Tests', () => {
     await allure.tag("api");
     await allure.tag("put");
     
-    const testTodo = new TodoBuilder().withTitle('Начальная запись').build();
+    const testTodo = new TodoBuilder()
+      .withTitle(faker.lorem.words(2))
+      .build();
     const createResponse = await api.todos.createTodo(testTodo);
     const createdTodo = await createResponse.json();
 
     const updatedData = new TodoBuilder()
-      .withTitle('Обновленная запись для диплома')
-      .withDescription('Обновленное описание')
+      .withTitle(faker.lorem.words(3))
+      .withDescription(faker.lorem.sentence())
       .withDoneStatus(true)
       .build();
 
@@ -96,8 +101,8 @@ test.describe('API Todo Tests', () => {
     expect(response.status()).toBe(200);
     
     const updatedTodo = await response.json();
-    expect(updatedTodo.title).toBe('Обновленная запись для диплома');
-    expect(updatedTodo.description).toBe('Обновленное описание');
+    expect(updatedTodo.title).toBe(updatedData.title);
+    expect(updatedTodo.description).toBe(updatedData.description);
     expect(updatedTodo.doneStatus).toBe(true);
   });
 
@@ -109,7 +114,9 @@ test.describe('API Todo Tests', () => {
     await allure.tag("api");
     await allure.tag("delete");
     
-    const testTodo = new TodoBuilder().withTitle('Задача для удаления').build();
+    const testTodo = new TodoBuilder()
+      .withTitle(faker.lorem.words(3))
+      .build();
     const createResponse = await api.todos.createTodo(testTodo);
     const createdTodo = await createResponse.json();
 

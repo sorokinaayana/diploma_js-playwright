@@ -3,12 +3,13 @@
 export class EditorPage extends BasePage {
   constructor(page) {
     super(page);
-    this.articleTitleInput = page.locator('input').first();
-    this.articleAboutInput = page.locator('input').nth(1);
-    this.articleBodyInput = page.locator('textarea').first();
-    this.tagsInput = page.locator('input').last();
-    this.publishButton = page.getByRole('button', { name: 'Publish Article' });
-    this.updateButton = page.getByRole('button', { name: 'Update Article' });
+    
+    this.articleTitleInput = page.getByPlaceholder('Article Title');
+    this.articleAboutInput = page.getByPlaceholder("What's this article about?");
+    this.articleBodyInput = page.getByPlaceholder('Write your article (in markdown)');
+    this.tagsInput = page.getByPlaceholder('Enter tags');
+    
+    this.publishArticleButton = page.getByRole('button', { name: 'Publish Article' });
   }
 
   async createNewArticle(articleData) {
@@ -16,23 +17,15 @@ export class EditorPage extends BasePage {
     await this.articleAboutInput.fill(articleData.description);
     await this.articleBodyInput.fill(articleData.body);
     
-    await this.tagsInput.fill(articleData.tags[0]);
-    await this.tagsInput.press('Enter');
+    if (articleData.tags && articleData.tags.length > 0) {
+      await this.tagsInput.fill(articleData.tags.join(','));
+    }
     
-    // Добавляем ожидание перед кликом
-    await this.publishButton.waitFor({ state: 'visible' });
-    await this.publishButton.click();
-    
-    // Ждем загрузки страницы статьи
-    await this.page.waitForURL(/\/article\//);
+    await this.publishArticleButton.click(); //
   }
 
   async updateArticleBody(newBody) {
     await this.articleBodyInput.fill(newBody);
-    await this.updateButton.waitFor({ state: 'visible' });
-    await this.updateButton.click();
-    
-    // Ждем загрузки обновленной статьи
-    await this.page.waitForURL(/\/article\//);
+    await this.publishArticleButton.click();
   }
 }
